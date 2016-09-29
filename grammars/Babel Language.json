@@ -677,6 +677,16 @@
             { "include": "#graphql" }
           ]
         },
+        {
+          "comment": "styled-components support.",
+          "begin": "\\s*styled(?:(\\.\\w+)|(\\(\\w+\\))|(\\((?:'|\")\\w+(?:'|\")\\)))s*((`))",
+          "name": "support.styled-components",
+          "contentName": "source.embedded.styled-components",
+          "end": "\\s*(?<!\\\\)((`))",
+          "patterns": [
+            { "include": "source.css" }
+          ]
+        },
         { "include": "languagebabel.ttlextension"},
         {
           "comment": "Use two forms of scopes! fixes some themes",

@@ -2,6 +2,8 @@ path = require 'path'
 grammarTest = require 'atom-grammar-test'
 
 describe 'Grammar', ->
+  grammar = null
+
   beforeEach ->
     waitsForPromise ->
       atom.packages.activatePackage('language-babel')
@@ -13,6 +15,12 @@ describe 'Grammar', ->
       atom.packages.activatePackage('language-mustache')
     waitsForPromise ->
       atom.packages.activatePackage('language-html')
+    runs ->
+      grammar = atom.grammars.grammarForScopeName('source.js.jsx')
+
+  it 'parses the grammar', ->
+    expect(grammar).toBeDefined()
+    expect(grammar.scopeName).toBe "source.js.jsx"
 
   # babel-sublime test files
   grammarTest path.join(__dirname, 'fixtures/grammar/babel-sublime/flow.js')
@@ -53,3 +61,21 @@ describe 'Grammar', ->
 
   # graphql test
   grammarTest path.join(__dirname, 'fixtures/grammar/graphql.js')
+
+  # styled-component test
+  describe 'styled-components', ->
+    it 'tokenizes dot notation', ->
+      {tokens,ruleStack} = grammar.tokenizeLine('styled.div`')
+      expect(tokens[0]).toEqual value: 'styled.div`', scopes: ['source.js.jsx', 'support.styled-components']
+      {tokens} = grammar.tokenizeLine('color: blue;', ruleStack)
+      expect(tokens[0]).toEqual value: 'color: blue;', scopes: ['source.js.jsx', 'support.styled-components', 'source.embedded.styled-components']
+      {tokens} = grammar.tokenizeLine('`', ruleStack)
+      expect(tokens[0]).toEqual value: '`', scopes: ['source.js.jsx', 'support.styled-components']
+    it 'tokenizes a component', ->
+      {tokens,ruleStack} = grammar.tokenizeLine('styled(ComponentName)`')
+      expect(tokens[0]).toEqual value: 'styled(ComponentName)`', scopes: ['source.js.jsx', 'support.styled-components']
+    it 'tokenizes a tagname', ->
+      {tokens,ruleStack} = grammar.tokenizeLine('styled(\'div\')`')
+      expect(tokens[0]).toEqual value: 'styled(\'div\')`', scopes: ['source.js.jsx', 'support.styled-components']
+      {tokens,ruleStack} = grammar.tokenizeLine('styled(\"div\")`')
+      expect(tokens[0]).toEqual value: 'styled(\"div\")`', scopes: ['source.js.jsx', 'support.styled-components']
